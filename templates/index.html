@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processamento de Imagem</title>
+    <style>
+        /* Estilização para centralizar o conteúdo e ajustar a imagem */
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        /* Estilização da imagem */
+        img { 
+            max-width: 50%; 
+            margin-top: 20px; 
+            display: block;
+        }
+        /* Container para alinhar os botões lado a lado */
+        .button-container {
+            display: flex;
+            gap: 10px; /* Espaço entre os botões */
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Escolher imagem para carregar</h2>
+    <!-- recebe a imagem -->
+    <input type="file" id="fileInput">
+    <button onclick="carregarImagem()">Enviar</button>
+    <br>
+    <!-- local onde a imagem recebida é exibida -->
+    <img id="uploadedImage" style="display:none;">
+    <br>
+    <!-- botoes para aplicar filtro e mostrar imagem original -->
+    <div class="button-container">
+        <button onclick="aplicarFiltro('blur')">Aplicar Blur</button>
+        <button onclick="aplicarFiltro('sharpen')">Aplicar Sharpen</button>
+        <button onclick="aplicarFiltro('rotate')">Rotacionar 45°</button>
+        <button onclick="restaurarImagem()">Imagem Original</button>
+    </div>
+    
+    <script>
+        let originalImage = "";
+        
+        // função para ler a imagem selecionada e exibi-la na página
+        function carregarImagem() {
+            let fileInput = document.getElementById("fileInput");
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                originalImage = e.target.result; // armazena a imagem original
+                let uploadedImage = document.getElementById("uploadedImage");
+                uploadedImage.src = originalImage;
+                uploadedImage.style.display = "block"; // Exibe a imagem carregada
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+        // função para enviar a imagem e o filtro selecionado para o back(servidor) para processamento
+        function aplicarFiltro(filterType) {
+            if (!originalImage) {
+                alert("É necessário carregar uma imagem antes!");
+                return;
+            }
+            
+            let formData = new FormData();
+            formData.append("image", originalImage);
+            formData.append("filter", filterType);
+            
+            fetch("/process", { method: "POST", body: formData }) //envia para a rota process
+                .then(response => response.blob())
+                .then(blob => {
+                    let objectURL = URL.createObjectURL(blob);
+                    document.getElementById("uploadedImage").src = objectURL; // Atualiza a imagem exibida com o filtro aplicado
+                });
+        }
+        
+        // função para restaurar a imagem original
+        function restaurarImagem() {
+            if (originalImage) {
+                document.getElementById("uploadedImage").src = originalImage;
+            }
+        }
+    </script>
+</body>
+</html>
