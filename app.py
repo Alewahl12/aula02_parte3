@@ -6,7 +6,7 @@ import io
 
 app = Flask(__name__)
 
-# Função para aplicar o filtro selecionado na imagem
+# função para aplicar o filtro selecionado na imagem
 def aplicar_filtro(image_data, nome_filtro):
     # Decodifica a imagem enviada no formato base64 (data URL)
     # image_data tem o formato "data:image/jpeg;base64,XXXXX..."
